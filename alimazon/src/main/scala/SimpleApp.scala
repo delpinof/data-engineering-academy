@@ -7,6 +7,10 @@ object SimpleApp {
         val orders = spark.read.json("gs://de-training-input/alimazon/50000/client-orders/*.jsonl.gz")
         orders.createOrReplaceTempView("orders")
         val productsCount = spark.sql("select product_id, count(id) as orders_count from orders group by product_id order by orders_count desc")
-        productsCount.collect().foreach(println)
+        productsCount.write
+        	.format("com.databricks.spark.csv")
+        	.option("header", false)
+        	.option("delimiter", ",")
+        	.save("gs://de-training-output-fherdelpino/alimazon-assignment-result")
     }
 }
