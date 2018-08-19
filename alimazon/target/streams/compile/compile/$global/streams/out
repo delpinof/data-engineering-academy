@@ -1,0 +1,10 @@
+[0m[[0m[31merror[0m] [0m[0mC:\workspaces\scala\alimazon\src\main\scala\SimpleApp.scala:2:8: not found: object spark[0m
+[0m[[0m[31merror[0m] [0m[0mimport spark.implicits._[0m
+[0m[[0m[31merror[0m] [0m[0m       ^[0m
+[0m[[0m[31merror[0m] [0m[0mC:\workspaces\scala\alimazon\src\main\scala\SimpleApp.scala:10:18: not found: value spark[0m
+[0m[[0m[31merror[0m] [0m[0m    val orders = spark.read.json("gs://de-training-input/alimazon/50000/client-orders/*.jsonl.gz")[0m
+[0m[[0m[31merror[0m] [0m[0m                 ^[0m
+[0m[[0m[31merror[0m] [0m[0mC:\workspaces\scala\alimazon\src\main\scala\SimpleApp.scala:12:25: not found: value spark[0m
+[0m[[0m[31merror[0m] [0m[0m    val productsCount = spark.sql("select product_id, count(id) as orders_count from orders group by product_id order by orders_count desc") [0m
+[0m[[0m[31merror[0m] [0m[0m                        ^[0m
+[0m[[0m[31merror[0m] [0m[0mthree errors found[0m
