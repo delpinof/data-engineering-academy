@@ -16,17 +16,15 @@ object SimpleApp {
 		val m1s = sc.textFile("gs://de-training-input/matrices/matrix1.txt").toDS
 		val m2s = sc.textFile("gs://de-training-input/matrices/matrix2.txt").toDS
 
-    val mEntries1 = m1s.flatMap(row => {
+    def create_entries(row:String) : IndexedSeq[MatrixEntry] = {
       var c = row.split(",")
       for(i <- 1 until c.size) yield 
         MatrixEntry(c(0).toLong,i-1,c(i).toDouble)
-    })
+    }
 
-    val mEntries2 = m2s.flatMap(row => {
-      var c = row.split(",")
-      for(i <- 1 until c.size) yield 
-        MatrixEntry(c(0).toLong,i-1,c(i).toDouble)
-    })
+    val mEntries1 = m1s.flatMap(create_entries)
+
+    val mEntries2 = m2s.flatMap(create_entries)
 
     def create_blockMatrix(matrixEntries:Dataset[MatrixEntry]) : BlockMatrix = new CoordinateMatrix(matrixEntries.rdd).toBlockMatrix()
 
