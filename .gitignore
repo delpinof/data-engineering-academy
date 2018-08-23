@@ -2,3 +2,6 @@
 *.jar
 *.class
 *.cache
+*.properties
+*/target/
+*/project/
