@@ -7,6 +7,9 @@ import java.util.Calendar
 import java.sql.Timestamp
 
 object AlimazonC3v2 {
+	
+    case class orderRow(id:String,day_of_week:Int, product_id:String, total:Double)   
+
     def main(args: Array[String]) {
 
         val spark = SparkSession.builder().appName("alimazonC3").getOrCreate()
@@ -22,9 +25,7 @@ object AlimazonC3v2 {
             val c = Calendar.getInstance()
             c.setTime(t)
             c.get(Calendar.DAY_OF_WEEK)
-        }
-
-        case class orderRow(id:String,day_of_week:Int, product_id:String, total:Double)   
+        }        
 
         val ordersDS = ordersDF.map(row => orderRow(
                 row.getAs[String](0),
