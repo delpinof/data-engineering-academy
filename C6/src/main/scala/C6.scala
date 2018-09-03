@@ -15,12 +15,14 @@ object C6 {
 		val bucket = "de-training-output-fherdelpino"
 		val destFolder = "assignment-6"
 
+		log.warn("Reading stock-orders")
 		val orders = spark.read.json("gs://de-training-input/alimazon/200000/stock-orders/")
 
 		val products = orders.groupBy(year($"timestamp").alias("year"), weekofyear($"timestamp").alias("week"), substring($"id",0,2).alias("category"), $"product_id").agg(sum($"total").alias("total"), sum($"quantity").alias("quantity")).cache
 
 
-		/*****************************Top 5 Most Purchased Products, 34s ***********************************/
+		/*****************************Top 5 Most Purchased Products ***********************************/
+		log.warn("Starting Top 5 MOST Purchased Products")
 
 		val windowDesc = Window.partitionBy($"year", $"week", $"category").orderBy(desc("total"))
 
@@ -41,7 +43,8 @@ object C6 {
 		//coalesce is needed!!!
 		topMostTotals.coalesce(1).write.mode(SaveMode.Overwrite).option("codec", "org.apache.hadoop.io.compress.GzipCodec").csv(s"gs://$bucket/$destFolder/top-5-most")
 
-		/***********************Top 5 Least Purchased Products, 56s *************************************/
+		/***********************Top 5 Least Purchased Products *************************************/
+		log.warn("Starting Top 5 LEAST Purchased Products")
 
 		val windowAsc = Window.partitionBy($"year", $"week", $"category").orderBy(asc("total"))
 
@@ -61,15 +64,16 @@ object C6 {
 		topLeastTotals.coalesce(1).write.mode(SaveMode.Overwrite).option("codec", "org.apache.hadoop.io.compress.GzipCodec").csv(s"gs://$bucket/$destFolder/top-5-least")
 
 
-		/*****************************Categories, 1m 24s *******************************************/
+		/*****************************Categories *******************************************/
+		log.warn("Starting Categories")
 
 		//repartition to avoid empty partitions
 		//val topMostProductsConcat = topMostProductsDF.groupBy($"category").pivot("order").agg(first("product_id")).withColumn("top5_most", concat_ws(";", $"1", $"2", $"3", $"4", $"5")).drop("1","2","3","4","5")
-		val topMostProductsConcat = topMostProductsDF.groupBy($"category").pivot("order").agg(first("product_id")).withColumn("top5_most", concat_ws(";", $"1", $"2", $"3", $"4", $"5")).drop("1","2","3","4","5").repartition(9)
+		val topMostProductsConcat = topMostProductsDF.groupBy($"category").pivot("order").agg(first("product_id")).withColumn("top5_most", concat_ws(";", $"1", $"2", $"3", $"4", $"5")).drop("1","2","3","4","5").coalesce(9)
 
 		//repartition to avoid empty partitions
 		//val topLeastProductsConcat = topLeastProductsDF.groupBy($"category").pivot("order").agg(first("product_id")).withColumn("top5_least", concat_ws(";", $"1", $"2", $"3", $"4", $"5")).drop("1","2","3","4","5")
-		val topLeastProductsConcat = topLeastProductsDF.groupBy($"category").pivot("order").agg(first("product_id")).withColumn("top5_least", concat_ws(";", $"1", $"2", $"3", $"4", $"5")).drop("1","2","3","4","5").repartition(9)
+		val topLeastProductsConcat = topLeastProductsDF.groupBy($"category").pivot("order").agg(first("product_id")).withColumn("top5_least", concat_ws(";", $"1", $"2", $"3", $"4", $"5")).drop("1","2","3","4","5").coalesce(9)
 
 		val categoryTotals = orders.groupBy(substring($"id",0,2).alias("category")).agg(sum($"total").alias("total_spent"), sum($"quantity").alias("total_qty_cat"))
 
